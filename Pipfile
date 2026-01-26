@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 langchain = "==0.3.26"
-pydantic = "<3.0,>=2.7.4"
+pydantic = ">=2.7.4,<3.0"
 flask = "==3.1.1"
 sentence-transformers = "==4.1.0"
 langchain-google-genai = "==2.1.6"
@@ -14,9 +14,8 @@ python-dotenv = "==1.1.0"
 langchain-pinecone = "==0.2.8"
 langchain-groq = "==0.2.1"
 langchain-community = "==0.3.26"
-medical-chatbot = {file = ".", editable = true}
 
 [dev-packages]
 
 [requires]
-python_version = "3.12.12"
+python_version = "3.12"

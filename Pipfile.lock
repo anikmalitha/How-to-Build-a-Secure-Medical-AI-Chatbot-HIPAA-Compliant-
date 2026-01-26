@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "84bae42ec80bf28797ab6d84411467f4e3275bbdf0e33baa0f9fed57754b075c"
+            "sha256": "80cc7c6513cc98878bbc7138c25f87ca47f7093f54870017dcf423346dae7f1d"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.12.12"
+            "python_version": "3.12"
         },
         "sources": [
             {
@@ -1199,10 +1199,6 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==0.1.2"
-        },
-        "medical-chatbot": {
-            "editable": true,
-            "file": "."
         },
         "mpmath": {
             "hashes": [

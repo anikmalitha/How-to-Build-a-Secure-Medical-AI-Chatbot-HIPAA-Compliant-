@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+vcrpy = ">=8.0.0"
 langchain = "==0.3.26"
 pydantic = ">=2.7.4,<3.0"
 flask = "==3.1.1"

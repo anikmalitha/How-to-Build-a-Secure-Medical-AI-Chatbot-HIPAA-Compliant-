@@ -1,5 +1,4 @@
 langchain==0.3.26
-python==3.10.19
 flask==3.1.1 
 sentence-transformers==4.1.0
 langchain-google-genai==2.1.6

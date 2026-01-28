@@ -1,79 +1,1820 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<title>Medical Chatbot</title>
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css')}}"/>
-	</head>
-	
-	<body>
-		<div class="container-fluid h-100">
-			<div class="row justify-content-center h-100">		
-				<div class="col-md-8 col-xl-6 chat">
-					<div class="card">
-						<div class="card-header msg_head">
-							<div class="d-flex bd-highlight">
-								<div class="img_cont">
-									<img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img">
-									<span class="online_icon"></span>
-								</div>
-								<div class="user_info">
-									<span>Medical Chatbot</span>
-									<p>Ask me anything!</p>
-								</div>
-							</div>
-						</div>
-						<div id="messageFormeight" class="card-body msg_card_body">
-							
-						</div>
-						<div class="card-footer">
-							<form id="messageArea" class="input-group">
-								<input type="text" id="text" name="msg" placeholder="Type your message..." autocomplete="off" class="form-control type_msg" required/>
-								<div class="input-group-append">
-									<button type="submit" id="send" class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></button>
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<script>
-			$(document).ready(function() {
-				$("#messageArea").on("submit", function(event) {
-					event.preventDefault();
-					
-					const date = new Date();
-					const hour = date.getHours();
-					const minute = date.getMinutes();
-					const str_time = hour + ":" + minute;
-					var rawText = $("#text").val();
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glory Diagnostic Center - Your Health, Our Priority</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        * { font-family: 'Poppins', sans-serif; }
+        .hero-gradient { background: linear-gradient(135deg, #0d9488 0%, #0f766e 50%, #115e59 100%); }
+        .slide-animation { animation: slideIn 0.5s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+        .pulse-animation { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .float-animation { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .scrolled { background: white !important; box-shadow: 0 2px 20px rgba(0,0,0,0.1); }
+        .scrolled .nav-link { color: #0f766e !important; }
+        .scrolled .logo-text { color: #0f766e !important; }
+        .card-hover:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        .marquee { overflow: hidden; }
+        .marquee-content { display: flex; animation: marquee 20s linear infinite; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-					var userHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">' + rawText + '<span class="msg_time_send">'+ str_time + '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
-					
-					$("#text").val("");
-					$("#messageFormeight").append(userHtml);
+        /* ========== MEDICAL CHATBOT STYLES ========== */
+        .chat-modal-container {
+            position: fixed;
+            bottom: 100px;
+            left: 20px;
+            width: 400px;
+            max-width: calc(100vw - 40px);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .chat-modal-container.active {
+            display: block;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .chat .card {
+            border-radius: 20px !important;
+            overflow: hidden;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.25);
+            border: none;
+        }
+        
+        .chat .card-header {
+            border-radius: 20px 20px 0 0 !important;
+            border-bottom: 0 !important;
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 50%, #115e59 100%) !important;
+            padding: 18px 20px;
+        }
+        
+        .chat .user_info {
+            margin-left: 15px;
+            color: white;
+        }
+        
+        .chat .user_info span {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            display: block;
+        }
+        
+        .chat .user_info p {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 0;
+        }
+        
+        .chat .img_cont {
+            position: relative;
+            height: 50px;
+            width: 50px;
+            flex-shrink: 0;
+        }
+        
+        .chat .user_img {
+            height: 50px;
+            width: 50px;
+            border: 3px solid rgba(255,255,255,0.3);
+            object-fit: cover;
+            background: white;
+        }
+        
+        .chat .online_icon {
+            position: absolute;
+            height: 14px;
+            width: 14px;
+            background-color: #4cd137;
+            border-radius: 50%;
+            bottom: 2px;
+            right: 2px;
+            border: 2px solid white;
+            animation: pulse-green 2s infinite;
+        }
+        
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(76, 209, 55, 0.7); }
+            50% { box-shadow: 0 0 0 8px rgba(76, 209, 55, 0); }
+        }
+        
+        .chat .msg_card_body {
+            height: 400px;
+            overflow-y: auto;
+            background: linear-gradient(180deg, #f8fffe 0%, #f0fdfa 100%);
+            padding: 20px;
+        }
+        
+        .chat .msg_cotainer {
+            margin-left: 10px;
+            padding: 12px 16px;
+            background-color: white;
+            border-radius: 20px 20px 20px 5px;
+            position: relative;
+            max-width: 80%;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .chat .msg_cotainer_send {
+            margin-right: 10px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+            color: white;
+            border-radius: 20px 20px 5px 20px;
+            position: relative;
+            max-width: 80%;
+            box-shadow: 0 3px 10px rgba(13, 148, 136, 0.3);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .chat .msg_time {
+            display: block;
+            font-size: 10px;
+            color: #999;
+            margin-top: 6px;
+        }
+        
+        .chat .msg_time_send {
+            display: block;
+            font-size: 10px;
+            color: rgba(255,255,255,0.7);
+            margin-top: 6px;
+            text-align: right;
+        }
+        
+        .chat .img_cont_msg {
+            height: 38px;
+            width: 38px;
+            flex-shrink: 0;
+        }
+        
+        .chat .user_img_msg {
+            height: 38px;
+            width: 38px;
+            border: 2px solid #0d9488;
+            object-fit: cover;
+            background: white;
+        }
+        
+        .chat .card-footer {
+            background: white;
+            border-top: 1px solid #e8f5f3;
+            padding: 15px;
+            border-radius: 0 0 20px 20px !important;
+        }
+        
+        .chat .type_msg {
+            border-radius: 25px !important;
+            border: 2px solid #e0f2f1 !important;
+            padding: 12px 20px !important;
+            height: 50px !important;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .chat .type_msg:focus {
+            border-color: #0d9488 !important;
+            box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1) !important;
+            outline: none;
+        }
+        
+        .chat .send_btn {
+            border-radius: 50% !important;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
+            border: none !important;
+            color: white !important;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .chat .send_btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 5px 20px rgba(13, 148, 136, 0.4);
+        }
+        
+        .chat .input-group {
+            display: flex;
+            align-items: center;
+        }
+        
+        .chat .input-group-append {
+            margin-left: 0;
+        }
+        
+        .close-chat-btn {
+            position: absolute;
+            top: 18px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .close-chat-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+        
+        .clear-chat-btn {
+            position: absolute;
+            top: 18px;
+            right: 55px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .clear-chat-btn:hover {
+            background: rgba(239, 68, 68, 0.8);
+        }
+        
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 20px;
+            margin-left: 10px;
+            width: fit-content;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+        
+        .typing-indicator span {
+            height: 10px;
+            width: 10px;
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            animation: typing 1.2s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+            margin-right: 0;
+        }
+        
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); opacity: 0.5; }
+            50% { transform: translateY(-8px); opacity: 1; }
+        }
 
-					$.ajax({
-						data: JSON.stringify({msg: rawText}),
-						type: "POST",
-						url: "/get",
-						contentType: "application/json",
-						dataType: "json"
-					}).done(function(data) {
-						var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + data.response + '<span class="msg_time">' + str_time + '</span></div></div>';
-						$("#messageFormeight").append($.parseHTML(botHtml));
-					}).fail(function(error) {
-						console.error('Error:', error);
-						var errorHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">Sorry, something went wrong. Please try again.<span class="msg_time">' + str_time + '</span></div></div>';
-						$("#messageFormeight").append($.parseHTML(errorHtml));
-					});
-				});
-			});
-		</script>
-	</body>
+        /* Scrollbar styling for chat */
+        .msg_card_body::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .msg_card_body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .msg_card_body::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #0d9488, #0f766e);
+            border-radius: 3px;
+        }
+        
+        /* Chat bubble float button */
+        .chat-float-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 50%, #115e59 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 30px rgba(13, 148, 136, 0.5);
+            z-index: 999;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .chat-float-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 35px rgba(13, 148, 136, 0.6);
+        }
+        
+        .chat-float-btn img {
+            width: 38px;
+            height: 38px;
+        }
+        
+        .chat-float-btn .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid white;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* Quick action buttons in chat */
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .quick-action-btn {
+            background: linear-gradient(135deg, #e6fffa 0%, #ccfbf1 100%);
+            color: #0f766e;
+            border: 1px solid #99f6e4;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .quick-action-btn:hover {
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+            color: white;
+            border-color: #0d9488;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+        }
+
+        /* Disease/Medical info styling in chat */
+        .medical-info {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        
+        .medical-warning {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-left: 4px solid #ef4444;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        
+        .medical-tip {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid #10b981;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            .chat-modal-container {
+                left: 10px;
+                right: 10px;
+                bottom: 85px;
+                width: auto;
+                max-width: none;
+            }
+            
+            .chat .msg_card_body {
+                height: 350px;
+            }
+            
+            .chat .card-header {
+                padding: 15px;
+            }
+            
+            .chat .user_info span {
+                font-size: 16px;
+            }
+            
+            .chat .img_cont {
+                height: 45px;
+                width: 45px;
+            }
+            
+            .chat .user_img {
+                height: 45px;
+                width: 45px;
+            }
+            
+            .chat-float-btn {
+                width: 58px;
+                height: 58px;
+                bottom: 20px;
+                left: 20px;
+            }
+            
+            .chat-float-btn img {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .chat .msg_cotainer,
+            .chat .msg_cotainer_send {
+                max-width: 85%;
+                font-size: 13px;
+            }
+            
+            .quick-action-btn {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .chat .msg_card_body {
+                height: 300px;
+            }
+            
+            .chat .type_msg {
+                height: 45px !important;
+                padding: 10px 15px !important;
+                font-size: 13px;
+            }
+            
+            .chat .send_btn {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .clear-chat-btn,
+            .close-chat-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+            
+            .clear-chat-btn {
+                right: 48px;
+            }
+        }
+
+        /* Loading animation for AI response */
+        .ai-thinking {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .ai-thinking::after {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: #0d9488;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Top Bar -->
+    <div class="bg-teal-700 text-white py-2 text-sm">
+        <div class="container mx-auto px-4 flex flex-wrap justify-between items-center">
+            <div class="flex items-center gap-4 flex-wrap">
+                <span><i class="fas fa-phone-alt mr-2"></i>Hotline: 10650</span>
+                <span><i class="fas fa-envelope mr-2"></i>info@glorydiagnostic.com</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="#" class="hover:text-teal-200"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="hover:text-teal-200"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="hover:text-teal-200"><i class="fab fa-youtube"></i></a>
+                <a href="#" class="hover:text-teal-200"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav id="navbar" class="bg-white/95 backdrop-blur-sm sticky top-0 z-50 transition-all duration-300 shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-3">
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-700 rounded-full flex items-center justify-center">
+                        <i class="fas fa-heartbeat text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="logo-text text-xl font-bold text-teal-700">Glory Diagnostic</h1>
+                        <p class="text-xs text-gray-500">Your Health, Our Priority</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden lg:flex items-center gap-6">
+                    <a href="#home" class="nav-link text-teal-700 font-medium hover:text-teal-500 transition">Home</a>
+                    <a href="#about" class="nav-link text-teal-700 font-medium hover:text-teal-500 transition">About Us</a>
+                    <a href="#services" class="nav-link text-teal-700 font-medium hover:text-teal-500 transition">Services</a>
+                    <a href="#tests" class="nav-link text-teal-700 font-medium hover:text-teal-500 transition">Tests</a>
+                    <a href="#packages" class="nav-link text-teal-700 font-medium hover:text-teal-500 transition">Health Packages</a>
+                    <a href="#doctors" class="nav-link text-teal-700 font-medium hover:text-teal-500 transition">Doctors</a>
+                    <a href="#branches" class="nav-link text-teal-700 font-medium hover:text-teal-500 transition">Branches</a>
+                    <a href="#contact" class="nav-link text-teal-700 font-medium hover:text-teal-500 transition">Contact</a>
+                </div>
+
+                <!-- CTA Buttons -->
+                <div class="hidden md:flex items-center gap-3">
+                    <button onclick="openModal('reportModal')" class="px-4 py-2 border-2 border-teal-600 text-teal-600 rounded-full hover:bg-teal-600 hover:text-white transition font-medium">
+                        <i class="fas fa-file-medical mr-2"></i>Download Report
+                    </button>
+                    <button onclick="openModal('appointmentModal')" class="px-4 py-2 bg-teal-600 text-white rounded-full hover:bg-teal-700 transition font-medium pulse-animation">
+                        <i class="fas fa-calendar-check mr-2"></i>Book Appointment
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobileMenuBtn" class="lg:hidden text-teal-700 text-2xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden lg:hidden bg-white border-t">
+            <div class="container mx-auto px-4 py-4 flex flex-col gap-3">
+                <a href="#home" class="text-teal-700 py-2 border-b">Home</a>
+                <a href="#about" class="text-teal-700 py-2 border-b">About Us</a>
+                <a href="#services" class="text-teal-700 py-2 border-b">Services</a>
+                <a href="#tests" class="text-teal-700 py-2 border-b">Tests</a>
+                <a href="#packages" class="text-teal-700 py-2 border-b">Health Packages</a>
+                <a href="#doctors" class="text-teal-700 py-2 border-b">Doctors</a>
+                <a href="#branches" class="text-teal-700 py-2 border-b">Branches</a>
+                <a href="#contact" class="text-teal-700 py-2">Contact</a>
+                <div class="flex flex-col gap-2 mt-3">
+                    <button onclick="openModal('reportModal')" class="px-4 py-2 border-2 border-teal-600 text-teal-600 rounded-full">Download Report</button>
+                    <button onclick="openModal('appointmentModal')" class="px-4 py-2 bg-teal-600 text-white rounded-full">Book Appointment</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Slider -->
+    <section id="home" class="hero-gradient relative overflow-hidden">
+        <div class="container mx-auto px-4 py-16 md:py-24">
+            <div class="flex flex-col lg:flex-row items-center gap-10">
+                <div class="lg:w-1/2 text-white slide-animation">
+                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                        Advanced Healthcare<br>
+                        <span class="text-teal-200">Diagnostics</span>
+                    </h2>
+                    <p class="text-lg md:text-xl mb-8 text-teal-100">
+                        Experience world-class diagnostic services with state-of-the-art technology and expert medical professionals. Your health journey starts here.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <button onclick="openModal('appointmentModal')" class="px-8 py-4 bg-white text-teal-700 rounded-full font-semibold hover:bg-teal-100 transition shadow-lg">
+                            <i class="fas fa-calendar-alt mr-2"></i>Book Appointment
+                        </button>
+                        <a href="#services" class="px-8 py-4 border-2 border-white text-white rounded-full font-semibold hover:bg-white hover:text-teal-700 transition">
+                            <i class="fas fa-flask mr-2"></i>Our Services
+                        </a>
+                    </div>
+                    <div class="flex gap-8 mt-10">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold">25+</div>
+                            <div class="text-teal-200 text-sm">Years Experience</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold">500+</div>
+                            <div class="text-teal-200 text-sm">Expert Doctors</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold">50+</div>
+                            <div class="text-teal-200 text-sm">Branches</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:w-1/2 float-animation">
+                    <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=600&h=500&fit=crop" alt="Medical Team" class="rounded-2xl shadow-2xl w-full">
+                </div>
+            </div>
+        </div>
+        <!-- Decorative Elements -->
+        <div class="absolute top-20 right-10 w-20 h-20 bg-teal-400/20 rounded-full blur-xl"></div>
+        <div class="absolute bottom-20 left-10 w-32 h-32 bg-teal-300/20 rounded-full blur-xl"></div>
+    </section>
+
+    <!-- Quick Services Bar -->
+    <section class="bg-white py-6 shadow-lg relative -mt-8 mx-4 md:mx-auto md:max-w-6xl rounded-2xl z-10">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 px-6">
+            <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-teal-50 cursor-pointer transition">
+                <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-vial text-teal-600 text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800">Lab Tests</h4>
+                    <p class="text-xs text-gray-500">1000+ Tests</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-teal-50 cursor-pointer transition">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-x-ray text-blue-600 text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800">Radiology</h4>
+                    <p class="text-xs text-gray-500">CT, MRI, X-Ray</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-teal-50 cursor-pointer transition">
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-heart text-purple-600 text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800">Cardiology</h4>
+                    <p class="text-xs text-gray-500">ECG, Echo</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-teal-50 cursor-pointer transition">
+                <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-home text-orange-600 text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800">Home Service</h4>
+                    <p class="text-xs text-gray-500">Sample Collection</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="lg:w-1/2">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1551076805-e1869033e561?w=600&h=400&fit=crop" alt="About Glory Diagnostic" class="rounded-2xl shadow-xl w-full">
+                        <div class="absolute -bottom-6 -right-6 bg-teal-600 text-white p-6 rounded-2xl shadow-xl">
+                            <div class="text-4xl font-bold">25+</div>
+                            <div class="text-sm">Years of Excellence</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:w-1/2">
+                    <span class="text-teal-600 font-semibold">ABOUT US</span>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mt-2 mb-6">Leading Diagnostic Center in the Country</h2>
+                    <p class="text-gray-600 mb-6">
+                        Glory Diagnostic Center has been serving patients with dedication and excellence since 1999. We are committed to providing accurate, timely, and affordable diagnostic services using the latest technology and highly trained professionals.
+                    </p>
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-check-circle text-teal-600 text-xl"></i>
+                            <span class="text-gray-700">NABL Accredited</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-check-circle text-teal-600 text-xl"></i>
+                            <span class="text-gray-700">ISO Certified</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-check-circle text-teal-600 text-xl"></i>
+                            <span class="text-gray-700">Expert Pathologists</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-check-circle text-teal-600 text-xl"></i>
+                            <span class="text-gray-700">24/7 Service</span>
+                        </div>
+                    </div>
+                    <a href="#services" class="inline-block px-8 py-4 bg-teal-600 text-white rounded-full font-semibold hover:bg-teal-700 transition">
+                        Learn More <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <span class="text-teal-600 font-semibold">OUR SERVICES</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mt-2">Comprehensive Diagnostic Services</h2>
+                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">We offer a wide range of diagnostic services with cutting-edge technology and expert medical professionals.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Service Cards -->
+                <div class="bg-white border rounded-2xl p-6 card-hover transition-all duration-300 cursor-pointer group">
+                    <div class="w-16 h-16 bg-teal-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-teal-600 transition">
+                        <i class="fas fa-microscope text-2xl text-teal-600 group-hover:text-white transition"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Pathology</h3>
+                    <p class="text-gray-600 text-sm">Complete blood tests, urine analysis, and biochemistry tests with accurate results.</p>
+                </div>
+                <div class="bg-white border rounded-2xl p-6 card-hover transition-all duration-300 cursor-pointer group">
+                    <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-blue-600 transition">
+                        <i class="fas fa-x-ray text-2xl text-blue-600 group-hover:text-white transition"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Radiology</h3>
+                    <p class="text-gray-600 text-sm">Digital X-Ray, CT Scan, MRI, and Ultrasound with expert radiologists.</p>
+                </div>
+                <div class="bg-white border rounded-2xl p-6 card-hover transition-all duration-300 cursor-pointer group">
+                    <div class="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-red-600 transition">
+                        <i class="fas fa-heartbeat text-2xl text-red-600 group-hover:text-white transition"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Cardiology</h3>
+                    <p class="text-gray-600 text-sm">ECG, Echocardiography, TMT, Holter monitoring, and cardiac consultation.</p>
+                </div>
+                <div class="bg-white border rounded-2xl p-6 card-hover transition-all duration-300 cursor-pointer group">
+                    <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-purple-600 transition">
+                        <i class="fas fa-brain text-2xl text-purple-600 group-hover:text-white transition"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Neurology</h3>
+                    <p class="text-gray-600 text-sm">EEG, EMG, NCV tests and neurological consultations with specialists.</p>
+                </div>
+                <div class="bg-white border rounded-2xl p-6 card-hover transition-all duration-300 cursor-pointer group">
+                    <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-green-600 transition">
+                        <i class="fas fa-lungs text-2xl text-green-600 group-hover:text-white transition"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Pulmonology</h3>
+                    <p class="text-gray-600 text-sm">Pulmonary function tests, spirometry, and respiratory care services.</p>
+                </div>
+                <div class="bg-white border rounded-2xl p-6 card-hover transition-all duration-300 cursor-pointer group">
+                    <div class="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-yellow-600 transition">
+                        <i class="fas fa-baby text-2xl text-yellow-600 group-hover:text-white transition"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Gynecology</h3>
+                    <p class="text-gray-600 text-sm">Prenatal care, ultrasound, and comprehensive women's health services.</p>
+                </div>
+                <div class="bg-white border rounded-2xl p-6 card-hover transition-all duration-300 cursor-pointer group">
+                    <div class="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-indigo-600 transition">
+                        <i class="fas fa-dna text-2xl text-indigo-600 group-hover:text-white transition"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Molecular Lab</h3>
+                    <p class="text-gray-600 text-sm">PCR testing, genetic testing, and advanced molecular diagnostics.</p>
+                </div>
+                <div class="bg-white border rounded-2xl p-6 card-hover transition-all duration-300 cursor-pointer group">
+                    <div class="w-16 h-16 bg-pink-100 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-pink-600 transition">
+                        <i class="fas fa-user-nurse text-2xl text-pink-600 group-hover:text-white transition"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Home Collection</h3>
+                    <p class="text-gray-600 text-sm">Sample collection from home with trained phlebotomists at your doorstep.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tests Section -->
+    <section id="tests" class="py-20 bg-teal-700">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <span class="text-teal-200 font-semibold">POPULAR TESTS</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mt-2">Book Your Test Online</h2>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Test Cards -->
+                <div class="bg-white rounded-2xl p-6 flex justify-between items-center card-hover transition-all duration-300">
+                    <div>
+                        <h4 class="font-bold text-gray-800">Complete Blood Count (CBC)</h4>
+                        <p class="text-gray-500 text-sm">Report: Same Day</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-teal-600 font-bold text-xl"><i class="fas fa-dollar-sign"></i>25</div>
+                        <button class="mt-2 px-4 py-1 bg-teal-600 text-white text-sm rounded-full hover:bg-teal-700">Book</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 flex justify-between items-center card-hover transition-all duration-300">
+                    <div>
+                        <h4 class="font-bold text-gray-800">Lipid Profile</h4>
+                        <p class="text-gray-500 text-sm">Report: Same Day</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-teal-600 font-bold text-xl"><i class="fas fa-dollar-sign"></i>40</div>
+                        <button class="mt-2 px-4 py-1 bg-teal-600 text-white text-sm rounded-full hover:bg-teal-700">Book</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 flex justify-between items-center card-hover transition-all duration-300">
+                    <div>
+                        <h4 class="font-bold text-gray-800">Thyroid Profile (T3, T4, TSH)</h4>
+                        <p class="text-gray-500 text-sm">Report: Same Day</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-teal-600 font-bold text-xl"><i class="fas fa-dollar-sign"></i>60</div>
+                        <button class="mt-2 px-4 py-1 bg-teal-600 text-white text-sm rounded-full hover:bg-teal-700">Book</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 flex justify-between items-center card-hover transition-all duration-300">
+                    <div>
+                        <h4 class="font-bold text-gray-800">HbA1c (Diabetes)</h4>
+                        <p class="text-gray-500 text-sm">Report: Same Day</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-teal-600 font-bold text-xl"><i class="fas fa-dollar-sign"></i>35</div>
+                        <button class="mt-2 px-4 py-1 bg-teal-600 text-white text-sm rounded-full hover:bg-teal-700">Book</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 flex justify-between items-center card-hover transition-all duration-300">
+                    <div>
+                        <h4 class="font-bold text-gray-800">Liver Function Test (LFT)</h4>
+                        <p class="text-gray-500 text-sm">Report: Same Day</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-teal-600 font-bold text-xl"><i class="fas fa-dollar-sign"></i>50</div>
+                        <button class="mt-2 px-4 py-1 bg-teal-600 text-white text-sm rounded-full hover:bg-teal-700">Book</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 flex justify-between items-center card-hover transition-all duration-300">
+                    <div>
+                        <h4 class="font-bold text-gray-800">Kidney Function Test (KFT)</h4>
+                        <p class="text-gray-500 text-sm">Report: Same Day</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-teal-600 font-bold text-xl"><i class="fas fa-dollar-sign"></i>45</div>
+                        <button class="mt-2 px-4 py-1 bg-teal-600 text-white text-sm rounded-full hover:bg-teal-700">Book</button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-10">
+                <button class="px-8 py-4 bg-white text-teal-700 rounded-full font-semibold hover:bg-teal-100 transition">
+                    View All Tests <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Packages -->
+    <section id="packages" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <span class="text-teal-600 font-semibold">HEALTH PACKAGES</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mt-2">Comprehensive Health Checkup Packages</h2>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Package 1 -->
+                <div class="bg-white rounded-2xl overflow-hidden shadow-lg card-hover transition-all duration-300">
+                    <div class="bg-gradient-to-r from-teal-500 to-teal-600 p-6 text-white">
+                        <h3 class="text-2xl font-bold">Basic Health Checkup</h3>
+                        <div class="text-4xl font-bold mt-2"><i class="fas fa-dollar-sign text-3xl"></i>99</div>
+                    </div>
+                    <div class="p-6">
+                        <ul class="space-y-3">
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> Complete Blood Count</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> Blood Sugar (Fasting)</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> Lipid Profile</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> Urine R/E</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> Chest X-Ray</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> ECG</li>
+                        </ul>
+                        <button onclick="openModal('appointmentModal')" class="w-full mt-6 py-3 bg-teal-600 text-white rounded-full font-semibold hover:bg-teal-700 transition">Book Now</button>
+                    </div>
+                </div>
+                <!-- Package 2 -->
+                <div class="bg-white rounded-2xl overflow-hidden shadow-lg card-hover transition-all duration-300 border-4 border-teal-500">
+                    <div class="bg-gradient-to-r from-teal-600 to-teal-700 p-6 text-white relative">
+                        <span class="absolute top-4 right-4 bg-yellow-400 text-gray-800 text-xs px-3 py-1 rounded-full font-bold">POPULAR</span>
+                        <h3 class="text-2xl font-bold">Executive Health Checkup</h3>
+                        <div class="text-4xl font-bold mt-2"><i class="fas fa-dollar-sign text-3xl"></i>199</div>
+                    </div>
+                    <div class="p-6">
+                        <ul class="space-y-3">
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> All Basic Package Tests</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> Thyroid Profile</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> Liver Function Test</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> Kidney Function Test</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> Ultrasonography Abdomen</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> Doctor Consultation</li>
+                        </ul>
+                        <button onclick="openModal('appointmentModal')" class="w-full mt-6 py-3 bg-teal-600 text-white rounded-full font-semibold hover:bg-teal-700 transition">Book Now</button>
+                    </div>
+                </div>
+                <!-- Package 3 -->
+                <div class="bg-white rounded-2xl overflow-hidden shadow-lg card-hover transition-all duration-300">
+                    <div class="bg-gradient-to-r from-teal-700 to-teal-800 p-6 text-white">
+                        <h3 class="text-2xl font-bold">Premium Health Checkup</h3>
+                        <div class="text-4xl font-bold mt-2"><i class="fas fa-dollar-sign text-3xl"></i>399</div>
+                    </div>
+                    <div class="p-6">
+                        <ul class="space-y-3">
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> All Executive Package Tests</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> Cardiac Stress Test (TMT)</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> Echocardiography</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> CT Scan (if required)</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> Vitamin D & B12</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check text-teal-500"></i> Specialist Consultation</li>
+                        </ul>
+                        <button onclick="openModal('appointmentModal')" class="w-full mt-6 py-3 bg-teal-600 text-white rounded-full font-semibold hover:bg-teal-700 transition">Book Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Doctors Section -->
+    <section id="doctors" class="py-20 bg-white overflow-hidden">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <span class="text-teal-600 font-semibold">OUR SPECIALISTS</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mt-2">Meet Our Expert Doctors</h2>
+                <p class="text-gray-600 mt-4">We have a team of 500+ expert doctors across all specialties</p>
+            </div>
+            
+            <!-- Slider Controls -->
+            <div class="flex justify-end gap-3 mb-6">
+                <button onclick="slideDoctors('prev')" class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 hover:bg-teal-600 hover:text-white transition">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button onclick="slideDoctors('next')" class="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center text-white hover:bg-teal-700 transition">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            
+            <!-- Doctors Slider -->
+            <div class="relative overflow-hidden">
+                <div id="doctorsSlider" class="flex gap-6 transition-transform duration-500 ease-in-out">
+                    <div class="min-w-[280px] md:min-w-[300px] bg-white rounded-2xl overflow-hidden shadow-lg text-center flex-shrink-0">
+                        <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=300&h=300&fit=crop" alt="Doctor" class="w-full h-64 object-cover">
+                        <div class="p-5">
+                            <h4 class="font-bold text-lg text-gray-800">Dr. Rafiq Ahmed</h4>
+                            <p class="text-teal-600 text-sm">MBBS, MD (Cardiology)</p>
+                            <p class="text-gray-500 text-sm mt-1">Consultant Cardiologist</p>
+                        </div>
+                    </div>
+                    <div class="min-w-[280px] md:min-w-[300px] bg-white rounded-2xl overflow-hidden shadow-lg text-center flex-shrink-0">
+                        <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=300&fit=crop" alt="Doctor" class="w-full h-64 object-cover">
+                        <div class="p-5">
+                            <h4 class="font-bold text-lg text-gray-800">Dr. Fatima Khan</h4>
+                            <p class="text-teal-600 text-sm">MBBS, FCPS (Radiology)</p>
+                            <p class="text-gray-500 text-sm mt-1">Senior Radiologist</p>
+                        </div>
+                    </div>
+                    <div class="min-w-[280px] md:min-w-[300px] bg-white rounded-2xl overflow-hidden shadow-lg text-center flex-shrink-0">
+                        <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=300&h=300&fit=crop" alt="Doctor" class="w-full h-64 object-cover">
+                        <div class="p-5">
+                            <h4 class="font-bold text-lg text-gray-800">Dr. Kamal Hossain</h4>
+                            <p class="text-teal-600 text-sm">MBBS, MD (Pathology)</p>
+                            <p class="text-gray-500 text-sm mt-1">Chief Pathologist</p>
+                        </div>
+                    </div>
+                    <div class="min-w-[280px] md:min-w-[300px] bg-white rounded-2xl overflow-hidden shadow-lg text-center flex-shrink-0">
+                        <img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=300&h=300&fit=crop" alt="Doctor" class="w-full h-64 object-cover">
+                        <div class="p-5">
+                            <h4 class="font-bold text-lg text-gray-800">Dr. Nasreen Akter</h4>
+                            <p class="text-teal-600 text-sm">MBBS, FCPS (Gynae)</p>
+                            <p class="text-gray-500 text-sm mt-1">Consultant Gynecologist</p>
+                        </div>
+                    </div>
+                    <div class="min-w-[280px] md:min-w-[300px] bg-white rounded-2xl overflow-hidden shadow-lg text-center flex-shrink-0">
+                        <img src="https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=300&h=300&fit=crop" alt="Doctor" class="w-full h-64 object-cover">
+                        <div class="p-5">
+                            <h4 class="font-bold text-lg text-gray-800">Dr. Imran Chowdhury</h4>
+                            <p class="text-teal-600 text-sm">MBBS, MD (Neurology)</p>
+                            <p class="text-gray-500 text-sm mt-1">Senior Neurologist</p>
+                        </div>
+                    </div>
+                    <div class="min-w-[280px] md:min-w-[300px] bg-white rounded-2xl overflow-hidden shadow-lg text-center flex-shrink-0">
+                        <img src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=300&h=300&fit=crop" alt="Doctor" class="w-full h-64 object-cover">
+                        <div class="p-5">
+                            <h4 class="font-bold text-lg text-gray-800">Dr. Sabrina Islam</h4>
+                            <p class="text-teal-600 text-sm">MBBS, DCH (Pediatrics)</p>
+                            <p class="text-gray-500 text-sm mt-1">Child Specialist</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-center gap-2 mt-8">
+                <span class="w-3 h-3 bg-teal-600 rounded-full cursor-pointer" onclick="goToSlide(0)"></span>
+                <span class="w-3 h-3 bg-gray-300 rounded-full cursor-pointer" onclick="goToSlide(1)"></span>
+                <span class="w-3 h-3 bg-gray-300 rounded-full cursor-pointer" onclick="goToSlide(2)"></span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Branches Section -->
+    <section id="branches" class="py-20 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <span class="text-teal-600 font-semibold">OUR NETWORK</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mt-2">Find Us Near You</h2>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition cursor-pointer">
+                    <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-map-marker-alt text-teal-600 text-xl"></i>
+                    </div>
+                    <h4 class="font-bold text-gray-800">Dhanmondi Branch</h4>
+                    <p class="text-gray-500 text-sm mt-2">House 12, Road 5, Dhanmondi, Dhaka</p>
+                    <p class="text-teal-600 text-sm mt-2"><i class="fas fa-phone mr-2"></i>01XXX-XXXXXX</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition cursor-pointer">
+                    <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-map-marker-alt text-teal-600 text-xl"></i>
+                    </div>
+                    <h4 class="font-bold text-gray-800">Gulshan Branch</h4>
+                    <p class="text-gray-500 text-sm mt-2">House 45, Road 11, Gulshan-2, Dhaka</p>
+                    <p class="text-teal-600 text-sm mt-2"><i class="fas fa-phone mr-2"></i>01XXX-XXXXXX</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition cursor-pointer">
+                    <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-map-marker-alt text-teal-600 text-xl"></i>
+                    </div>
+                    <h4 class="font-bold text-gray-800">Uttara Branch</h4>
+                    <p class="text-gray-500 text-sm mt-2">House 23, Sector 7, Uttara, Dhaka</p>
+                    <p class="text-teal-600 text-sm mt-2"><i class="fas fa-phone mr-2"></i>01XXX-XXXXXX</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition cursor-pointer">
+                    <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-map-marker-alt text-teal-600 text-xl"></i>
+                    </div>
+                    <h4 class="font-bold text-gray-800">Mirpur Branch</h4>
+                    <p class="text-gray-500 text-sm mt-2">House 8, Section 10, Mirpur, Dhaka</p>
+                    <p class="text-teal-600 text-sm mt-2"><i class="fas fa-phone mr-2"></i>01XXX-XXXXXX</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-20 bg-teal-700">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <span class="text-teal-200 font-semibold">TESTIMONIALS</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mt-2">What Our Patients Say</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="flex items-center gap-4 mb-4">
+                        <img src="https://i.pravatar.cc/100?img=1" alt="Patient" class="w-14 h-14 rounded-full">
+                        <div>
+                            <h4 class="font-bold text-gray-800">Mohammad Rahman</h4>
+                            <div class="text-yellow-400"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"Excellent service and very professional staff. The reports were delivered on time and the doctors explained everything clearly. Highly recommended!"</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="flex items-center gap-4 mb-4">
+                        <img src="https://i.pravatar.cc/100?img=5" alt="Patient" class="w-14 h-14 rounded-full">
+                        <div>
+                            <h4 class="font-bold text-gray-800">Fatema Begum</h4>
+                            <div class="text-yellow-400"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"The home sample collection service was very convenient. The phlebotomist was gentle and professional. Got my reports via email within hours."</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="flex items-center gap-4 mb-4">
+                        <img src="https://i.pravatar.cc/100?img=3" alt="Patient" class="w-14 h-14 rounded-full">
+                        <div>
+                            <h4 class="font-bold text-gray-800">Karim Ahmed</h4>
+                            <div class="text-yellow-400"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"State-of-the-art facilities and very hygienic environment. The staff is courteous and the doctors are very knowledgeable. Best diagnostic center!"</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col lg:flex-row gap-12">
+                <div class="lg:w-1/2">
+                    <span class="text-teal-600 font-semibold">CONTACT US</span>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mt-2 mb-6">Get in Touch</h2>
+                    <p class="text-gray-600 mb-8">Have questions? We're here to help. Reach out to us through any of the following methods.</p>
+                    <div class="space-y-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-map-marker-alt text-teal-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Main Office</h4>
+                                <p class="text-gray-600">House 12, Road 5, Dhanmondi, Dhaka-1205, Bangladesh</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-phone-alt text-teal-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Phone</h4>
+                                <p class="text-gray-600">Hotline: 10650</p>
+                                <p class="text-gray-600">+880-2-XXXXXXXX</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-envelope text-teal-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Email</h4>
+                                <p class="text-gray-600">info@glorydiagnostic.com</p>
+                                <p class="text-gray-600">support@glorydiagnostic.com</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-clock text-teal-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Working Hours</h4>
+                                <p class="text-gray-600">Saturday - Thursday: 7:00 AM - 10:00 PM</p>
+                                <p class="text-gray-600">Friday: 8:00 AM - 8:00 PM</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:w-1/2">
+                    <form id="contactForm" class="bg-gray-50 rounded-2xl p-8 shadow-lg">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Send us a Message</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-gray-700 mb-2">Full Name</label>
+                                <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500" placeholder="Your name" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Email Address</label>
+                                <input type="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500" placeholder="your@email.com" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Phone Number</label>
+                                <input type="tel" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500" placeholder="01XXX-XXXXXX" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Message</label>
+                                <textarea rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500" placeholder="Your message..." required></textarea>
+                            </div>
+                            <button type="submit" class="w-full py-4 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 transition">
+                                Send Message <i class="fas fa-paper-plane ml-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 pt-16 pb-8">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-700 rounded-full flex items-center justify-center">
+                            <i class="fas fa-heartbeat text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Glory Diagnostic</h3>
+                            <p class="text-xs text-gray-400">Your Health, Our Priority</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 mb-4">Leading diagnostic center providing comprehensive healthcare services with cutting-edge technology and expert professionals.</p>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:bg-teal-600 hover:text-white transition"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:bg-teal-600 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:bg-teal-600 hover:text-white transition"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center text-gray-400 hover:bg-teal-600 hover:text-white transition"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-6">Quick Links</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#about" class="hover:text-teal-400 transition">About Us</a></li>
+                        <li><a href="#services" class="hover:text-teal-400 transition">Our Services</a></li>
+                        <li><a href="#doctors" class="hover:text-teal-400 transition">Our Doctors</a></li>
+                        <li><a href="#packages" class="hover:text-teal-400 transition">Health Packages</a></li>
+                        <li><a href="#branches" class="hover:text-teal-400 transition">Branch Locations</a></li>
+                        <li><a href="#contact" class="hover:text-teal-400 transition">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-6">Our Services</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="hover:text-teal-400 transition">Pathology</a></li>
+                        <li><a href="#" class="hover:text-teal-400 transition">Radiology</a></li>
+                        <li><a href="#" class="hover:text-teal-400 transition">Cardiology</a></li>
+                        <li><a href="#" class="hover:text-teal-400 transition">Neurology</a></li>
+                        <li><a href="#" class="hover:text-teal-400 transition">Home Collection</a></li>
+                        <li><a href="#" class="hover:text-teal-400 transition">Online Reports</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-6">Contact Info</h4>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-map-marker-alt mt-1 text-teal-500"></i>
+                            <span>House 12, Road 5, Dhanmondi, Dhaka-1205</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-phone-alt text-teal-500"></i>
+                            <span>Hotline: 10650</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-envelope text-teal-500"></i>
+                            <span>info@glorydiagnostic.com</span>
+                        </li>
+                    </ul>
+                    <div class="mt-6">
+                        <h5 class="font-semibold text-white mb-3">Subscribe Newsletter</h5>
+                        <div class="flex">
+                            <input type="email" placeholder="Your email" class="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:outline-none focus:border-teal-500">
+                            <button class="px-4 py-2 bg-teal-600 text-white rounded-r-lg hover:bg-teal-700 transition"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p class="text-gray-500">© 2024 Glory Diagnostic Center. All rights reserved.</p>
+                    <div class="flex gap-6 text-gray-500 text-sm">
+                        <a href="#" class="hover:text-teal-400">Privacy Policy</a>
+                        <a href="#" class="hover:text-teal-400">Terms of Service</a>
+                        <a href="#" class="hover:text-teal-400">Refund Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Appointment Modal -->
+    <div id="appointmentModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h3 class="text-2xl font-bold text-gray-800">Book an Appointment</h3>
+                <button onclick="closeModal('appointmentModal')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <form id="appointmentForm" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-gray-700 mb-2">Full Name *</label>
+                    <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2">Phone *</label>
+                        <input type="tel" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Email</label>
+                        <input type="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2">Date *</label>
+                        <input type="date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Time</label>
+                        <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500">
+                            <option>Morning (8AM-12PM)</option>
+                            <option>Afternoon (12PM-4PM)</option>
+                            <option>Evening (4PM-8PM)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Service Type *</label>
+                    <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500" required>
+                        <option value="">Select Service</option>
+                        <option>Lab Tests</option>
+                        <option>Radiology (X-Ray, CT, MRI)</option>
+                        <option>Cardiology (ECG, Echo)</option>
+                        <option>Health Checkup Package</option>
+                        <option>Doctor Consultation</option>
+                        <option>Home Sample Collection</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Branch *</label>
+                    <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500" required>
+                        <option value="">Select Branch</option>
+                        <option>Dhanmondi</option>
+                        <option>Gulshan</option>
+                        <option>Uttara</option>
+                        <option>Mirpur</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Additional Notes</label>
+                    <textarea rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500" placeholder="Any special requirements..."></textarea>
+                </div>
+                <button type="submit" class="w-full py-4 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 transition">
+                    Confirm Appointment
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Download Modal -->
+    <div id="reportModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h3 class="text-2xl font-bold text-gray-800">Download Report</h3>
+                <button onclick="closeModal('reportModal')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <form id="reportForm" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-gray-700 mb-2">Patient ID / Report ID *</label>
+                    <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500" placeholder="Enter your ID" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Phone Number *</label>
+                    <input type="tel" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500" placeholder="Registered phone number" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Date of Birth *</label>
+                    <input type="date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500" required>
+                </div>
+                <button type="submit" class="w-full py-4 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 transition">
+                    <i class="fas fa-download mr-2"></i>Download Report
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MEDICAL AI CHATBOT ========== -->
+    <div id="chatModal" class="chat-modal-container chat">
+        <div class="card">
+            <div class="card-header msg_head" style="position: relative;">
+                <button class="clear-chat-btn" onclick="clearChatHistory()" title="Clear Chat History">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+                <button class="close-chat-btn" onclick="toggleChat()" title="Close Chat">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="d-flex bd-highlight">
+                    <div class="img_cont">
+                        <img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img">
+                        <span class="online_icon"></span>
+                    </div>
+                    <div class="user_info">
+                        <span>🩺 Medical AI Assistant</span>
+                        <p>Ask about diseases, symptoms & health tips</p>
+                    </div>
+                </div>
+            </div>
+            <div id="messageFormeight" class="card-body msg_card_body">
+                <!-- Welcome Message -->
+                <div class="d-flex justify-content-start mb-4">
+                    <div class="img_cont_msg">
+                        <img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg">
+                    </div>
+                    <div class="msg_cotainer">
+                        👋 <strong>Hello!</strong> I'm your Medical AI Assistant at Glory Diagnostic Center.
+                        <br><br>
+                        I can help you with:
+                        <br>• 🏥 Information about diseases & symptoms
+                        <br>• 🧪 Test recommendations
+                        <br>• 📅 Booking appointments
+                        <br>• 📍 Finding our branches
+                        <br>• 💊 General health advice
+                        
+                        <div class="quick-actions">
+                            <button class="quick-action-btn" onclick="sendQuickMsg('What are the symptoms of diabetes?')">🩸 Diabetes Info</button>
+                            <button class="quick-action-btn" onclick="sendQuickMsg('Tell me about heart disease')">❤️ Heart Health</button>
+                            <button class="quick-action-btn" onclick="sendQuickMsg('What tests should I do for a general checkup?')">🧪 Health Tests</button>
+                            <button class="quick-action-btn" onclick="sendQuickMsg('I have fever and headache')">🤒 Symptoms</button>
+                            <button class="quick-action-btn" onclick="sendQuickMsg('Book an appointment')">📅 Appointment</button>
+                            <button class="quick-action-btn" onclick="sendQuickMsg('Find nearest branch')">📍 Branches</button>
+                        </div>
+                        <span class="msg_time">Just now</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <form id="messageArea" class="input-group">
+                    <input type="text" id="text" name="msg" placeholder="Ask about symptoms, diseases, tests..." autocomplete="off" class="form-control type_msg" required/>
+                    <div class="input-group-append">
+                        <button type="submit" id="send" class="input-group-text send_btn"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Float Button -->
+    <button class="chat-float-btn" onclick="toggleChat()" id="chatFloatBtn" title="Chat with Medical AI">
+        <img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" alt="Chat">
+        <span class="notification-badge" id="chatNotification">1</span>
+    </button>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="fixed bottom-8 right-8 w-12 h-12 bg-teal-600 text-white rounded-full shadow-lg hidden items-center justify-center hover:bg-teal-700 transition z-40">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // ========== GENERAL WEBSITE FUNCTIONALITY ==========
+        
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Navbar Scroll Effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.getElementById(modalId).classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.getElementById(modalId).classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal on backdrop click
+        document.querySelectorAll('[id$="Modal"]').forEach(modal => {
+            if (modal.id !== 'chatModal') {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModal(modal.id);
+                    }
+                });
+            }
+        });
+
+        // Form Submissions
+        document.getElementById('appointmentForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Thank you! Your appointment has been booked successfully. We will contact you shortly.');
+            closeModal('appointmentModal');
+            e.target.reset();
+        });
+
+        document.getElementById('reportForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Your report is being prepared. If valid credentials, download will start shortly.');
+            closeModal('reportModal');
+            e.target.reset();
+        });
+
+        document.getElementById('contactForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Thank you for your message! We will get back to you soon.');
+            e.target.reset();
+        });
+
+        // Back to Top Button
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) {
+                backToTop.classList.remove('hidden');
+                backToTop.classList.add('flex');
+            } else {
+                backToTop.classList.add('hidden');
+                backToTop.classList.remove('flex');
+            }
+        });
+
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Smooth Scroll for Anchor Links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+
+        // Set minimum date for appointment to today
+        const dateInputs = document.querySelectorAll('input[type="date"]');
+        const today = new Date().toISOString().split('T')[0];
+        dateInputs.forEach(input => {
+            if (input.closest('#appointmentForm')) {
+                input.min = today;
+            }
+        });
+
+        // Doctors Slider Functionality
+        let currentSlide = 0;
+        const slider = document.getElementById('doctorsSlider');
+        const cardWidth = 306;
+        const visibleCards = window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 4;
+        const totalCards = 6;
+        const maxSlide = Math.ceil(totalCards / visibleCards) - 1;
+
+        function slideDoctors(direction) {
+            if (direction === 'next') {
+                currentSlide = currentSlide >= maxSlide ? 0 : currentSlide + 1;
+            } else {
+                currentSlide = currentSlide <= 0 ? maxSlide : currentSlide - 1;
+            }
+            updateSlider();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlider();
+        }
+
+        function updateSlider() {
+            const offset = currentSlide * cardWidth * visibleCards;
+            slider.style.transform = `translateX(-${offset}px)`;
+            
+            document.querySelectorAll('#doctors .flex.justify-center span').forEach((dot, index) => {
+                if (index === currentSlide) {
+                    dot.classList.remove('bg-gray-300');
+                    dot.classList.add('bg-teal-600');
+                } else {
+                    dot.classList.remove('bg-teal-600');
+                    dot.classList.add('bg-gray-300');
+                }
+            });
+        }
+
+        setInterval(() => {
+            slideDoctors('next');
+        }, 4000);
+
+        // ========== MEDICAL AI CHATBOT FUNCTIONALITY ==========
+        
+        let chatOpen = false;
+        
+        // Toggle Chat Window
+        function toggleChat() {
+            const chatModal = document.getElementById('chatModal');
+            const notification = document.getElementById('chatNotification');
+            
+            chatOpen = !chatOpen;
+            
+            if (chatOpen) {
+                chatModal.classList.add('active');
+                notification.style.display = 'none';
+                // Focus on input
+                setTimeout(() => {
+                    document.getElementById('text').focus();
+                }, 300);
+            } else {
+                chatModal.classList.remove('active');
+            }
+        }
+        
+        // Send quick message
+        function sendQuickMsg(message) {
+            const input = document.getElementById('text');
+            input.value = message;
+            document.getElementById('messageArea').dispatchEvent(new Event('submit'));
+        }
+        
+        // Clear chat history
+        function clearChatHistory() {
+            if (confirm('Are you sure you want to clear the chat history?')) {
+                $.ajax({
+                    type: "POST",
+                    url: "/clear",
+                    contentType: "application/json",
+                    success: function(data) {
+                        // Clear the chat UI
+                        const chatBody = document.getElementById('messageFormeight');
+                        chatBody.innerHTML = `
+                            <div class="d-flex justify-content-start mb-4">
+                                <div class="img_cont_msg">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg">
+                                </div>
+                                <div class="msg_cotainer">
+                                    🔄 Chat history cleared! How can I help you today?
+                                    <div class="quick-actions">
+                                        <button class="quick-action-btn" onclick="sendQuickMsg('What are the symptoms of diabetes?')">🩸 Diabetes Info</button>
+                                        <button class="quick-action-btn" onclick="sendQuickMsg('Tell me about heart disease')">❤️ Heart Health</button>
+                                        <button class="quick-action-btn" onclick="sendQuickMsg('Book an appointment')">📅 Appointment</button>
+                                    </div>
+                                    <span class="msg_time">Just now</span>
+                                </div>
+                            </div>
+                        `;
+                    },
+                    error: function(error) {
+                        console.error('Error clearing history:', error);
+                    }
+                });
+            }
+        }
+        
+        // Format AI Response with HTML
+        function formatResponse(response) {
+            // Convert markdown-like formatting to HTML
+            let formatted = response
+                // Bold text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                // Line breaks
+                .replace(/\n/g, '<br>')
+                // Bullet points
+                .replace(/• /g, '<br>• ')
+                .replace(/- /g, '<br>• ');
+            
+            return formatted;
+        }
+        
+        // Get current time
+        function getCurrentTime() {
+            const date = new Date();
+            const hour = date.getHours().toString().padStart(2, '0');
+            const minute = date.getMinutes().toString().padStart(2, '0');
+            return hour + ":" + minute;
+        }
+        
+        // Chat form submission
+        $(document).ready(function() {
+            $("#messageArea").on("submit", function(event) {
+                event.preventDefault();
+                
+                const str_time = getCurrentTime();
+                var rawText = $("#text").val().trim();
+                
+                if (!rawText) return;
+
+                // User message HTML
+                var userHtml = `
+                    <div class="d-flex justify-content-end mb-4">
+                        <div class="msg_cotainer_send">
+                            ${rawText}
+                            <span class="msg_time_send">${str_time}</span>
+                        </div>
+                        <div class="img_cont_msg">
+                            <img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg">
+                        </div>
+                    </div>
+                `;
+                
+                $("#text").val("");
+                $("#messageFormeight").append(userHtml);
+                
+                // Scroll to bottom
+                var chatBody = document.getElementById('messageFormeight');
+                chatBody.scrollTop = chatBody.scrollHeight;
+                
+                // Show typing indicator
+                var typingHtml = `
+                    <div class="d-flex justify-content-start mb-4" id="typingIndicator">
+                        <div class="img_cont_msg">
+                            <img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg">
+                        </div>
+                        <div class="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                `;
+                $("#messageFormeight").append(typingHtml);
+                chatBody.scrollTop = chatBody.scrollHeight;
+
+                // Send to Flask backend
+                $.ajax({
+                    data: JSON.stringify({msg: rawText}),
+                    type: "POST",
+                    url: "/get",
+                    contentType: "application/json",
+                    dataType: "json"
+                }).done(function(data) {
+                    // Remove typing indicator
+                    $("#typingIndicator").remove();
+                    
+                    const formattedResponse = formatResponse(data.response);
+                    
+                    var botHtml = `
+                        <div class="d-flex justify-content-start mb-4">
+                            <div class="img_cont_msg">
+                                <img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg">
+                            </div>
+                            <div class="msg_cotainer">
+                                ${formattedResponse}
+                                <span class="msg_time">${str_time}</span>
+                            </div>
+                        </div>
+                    `;
+                    $("#messageFormeight").append($.parseHTML(botHtml));
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                    
+                }).fail(function(error) {
+                    // Remove typing indicator
+                    $("#typingIndicator").remove();
+                    
+                    console.error('Error:', error);
+                    
+                    var errorHtml = `
+                        <div class="d-flex justify-content-start mb-4">
+                            <div class="img_cont_msg">
+                                <img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg">
+                            </div>
+                            <div class="msg_cotainer">
+                                <div class="medical-warning">
+                                    ⚠️ Sorry, I'm having trouble connecting right now. Please try again or contact us directly:
+                                    <br><br>
+                                    📞 Hotline: <strong>10650</strong>
+                                    <br>📧 Email: info@glorydiagnostic.com
+                                </div>
+                                <span class="msg_time">${str_time}</span>
+                            </div>
+                        </div>
+                    `;
+                    $("#messageFormeight").append($.parseHTML(errorHtml));
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                });
+            });
+            
+            // Handle Enter key
+            $("#text").on("keypress", function(e) {
+                if (e.which === 13 && !e.shiftKey) {
+                    e.preventDefault();
+                    $("#messageArea").submit();
+                }
+            });
+        });
+        
+        // Close chat when clicking outside (on mobile)
+        document.addEventListener('click', function(e) {
+            const chatModal = document.getElementById('chatModal');
+            const chatBtn = document.getElementById('chatFloatBtn');
+            
+            if (chatOpen && 
+                !chatModal.contains(e.target) && 
+                !chatBtn.contains(e.target)) {
+                // Don't close on mobile - users need explicit close button
+                if (window.innerWidth > 768) {
+                    // toggleChat();
+                }
+            }
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            // Adjust chat position/size if needed
+        });
+    </script>
+</body>
 </html>
